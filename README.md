@@ -6,11 +6,14 @@ the ChatGPT desktop app, and Codex.
 
 ## Add the marketplace
 
-Use this GitHub repository as the marketplace source:
+Use the GitHub `owner/repo` value as the marketplace source:
 
 ```text
-https://github.com/pray-mrscraper/mrscraper-chatgpt-plugin
+pray-mrscraper/mrscraper-chatgpt-plugin
 ```
+
+If the client specifically asks for a Git repository URL, use
+`https://github.com/pray-mrscraper/mrscraper-chatgpt-plugin.git`.
 
 From Codex CLI, add the marketplace and install the plugin:
 
