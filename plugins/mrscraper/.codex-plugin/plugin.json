@@ -1,0 +1,48 @@
+{
+  "name": "mrscraper",
+  "version": "0.1.0",
+  "description": "MrScraper MCP workflows for web fetching, structured extraction, Google discovery, and saved runs.",
+  "author": {
+    "name": "MrScraper",
+    "url": "https://github.com/mrscraper-com"
+  },
+  "homepage": "https://docs.mrscraper.com/docs/getting-started/mcp-server",
+  "repository": "https://github.com/pray-mrscraper/mrscraper-chatgpt-plugin",
+  "license": "MIT",
+  "keywords": [
+    "mrscraper",
+    "mcp",
+    "web-scraping",
+    "data-extraction",
+    "search",
+    "research"
+  ],
+  "skills": "./skills/",
+  "mcpServers": {
+    "mrscraper": {
+      "type": "http",
+      "url": "https://mcp.mrscraper.com/mcp"
+    }
+  },
+  "interface": {
+    "displayName": "MrScraper",
+    "shortDescription": "Fetch and extract web data",
+    "longDescription": "Use MrScraper MCP to fetch page content, extract structured JSON, discover pages through Google, rerun saved scraper configurations, inspect stored results, and check account usage. Authentication is handled through the MCP connection.",
+    "developerName": "MrScraper",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://docs.mrscraper.com/docs/getting-started/mcp-server",
+    "privacyPolicyURL": "https://mrscraper.com/privacy-policy",
+    "termsOfServiceURL": "https://mrscraper.com/terms-of-use",
+    "composerIcon": "./assets/mrscraper-chatgpt-composer-icon.png",
+    "logo": "./assets/mrscraper-plugin-logo.png",
+    "defaultPrompt": [
+      "Get all listing information from this URL and save the extracted JSON.",
+      "Fetch this page and summarize its contents.",
+      "Search Google for this topic and return the most relevant sources."
+    ]
+  }
+}

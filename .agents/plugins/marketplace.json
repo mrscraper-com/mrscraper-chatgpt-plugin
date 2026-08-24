@@ -1,0 +1,20 @@
+{
+  "name": "mrscraper-plugins",
+  "interface": {
+    "displayName": "MrScraper for ChatGPT"
+  },
+  "plugins": [
+    {
+      "name": "mrscraper",
+      "source": {
+        "source": "local",
+        "path": "./plugins/mrscraper"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}
