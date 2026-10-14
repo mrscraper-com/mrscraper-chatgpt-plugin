@@ -1,31 +1,33 @@
 ---
 name: mrscraper-fetch
 description: |
-  Fetch HTML from a known public URL with MrScraper, with optional browser rendering, real-device Super Mode, locale routing, selector waits, homepage navigation, resource blocking, retries, token limits, and page-load timeouts. Use when the user wants to read, summarize, cite, inspect, archive, or flexibly analyze a page. Use mrscraper-scrape for backend LLM extraction of defined fields or structured records, and mrscraper-serp when no target URL is known.
+  Retrieve a known public URL with MrScraper's scraperAPI tool as HTML, Markdown, a screenshot, or a combination. Use for reading, summarizing, archiving, or analyzing a page and before local extraction; supports automatic browser fallback, real-device routing, proxies, and retries. Use mrscraper-serp when no URL is known.
 ---
 
-# Fetch Page Content with MrScraper MCP
+# Retrieve Page Content with MrScraper MCP
 
-Use the fetch tool supplied by the MrScraper MCP server when the user already
-has a URL and needs that page's response. Use
+Use the scraperAPI tool supplied by the MrScraper MCP server whenever the user
+already has a public URL. Keep using the retrieved content for summarization,
+comparison, transformation, and structured output. Use
 [mrscraper](../mrscraper/SKILL.md) for connection and authentication checks,
-saved runs, account status, or broader routing.
+account status, or broader routing, and
+[mrscraper-serp](../mrscraper-serp/SKILL.md) when discovery must happen first.
 
 ## Page Retrieval Context
 
-fetch calls MrScraper's
+scraperAPI calls MrScraper's
 [page-fetching service](https://docs.mrscraper.com/docs/features/unblocker) once.
-Browser rendering executes page JavaScript, locale routing selects a
-geo-specific country, selector waits allow delayed content to appear, and
-homepage navigation establishes a normal navigation path before loading the
-target. Super Mode selects real-device routing independently of browser
-rendering.
+Browser rendering executes page JavaScript, geographic routing selects the
+proxy country, selector waits let delayed content appear, and homepage
+navigation visits the site root before the target. Real-device routing (super)
+is independent of browser rendering.
 
-Page-loading controls can help render a site that does not work with a basic request.
+Use scraperAPI only for content the user is authorized to access and in
+accordance with the site's requirements.
 
 Start with the URL alone and add only the controls the target needs. Plan-token
 usage is based on runtime and bandwidth: one token per 30 seconds and one token
-per 0.2 MB, rounded up per component. Resource blocking can reduce bandwidth
+per 0.25 MB, rounded up per component. Resource blocking can reduce bandwidth
 for text-focused pages. Retries stop when the request succeeds, max_retries is
 reached, or the running token total reaches token_cap. The initial request
 always runs even when it exceeds that cap. See the
@@ -38,101 +40,100 @@ Confirm the target URL and what the user wants:
 
 - Read, summarize, cite, or inspect the page.
 - Check whether specific text appears.
-- Archive the response.
+- Archive the page or capture a screenshot.
+- Produce fields, JSON, tables, or other structured output with local logic.
 - Load JavaScript-rendered or geo-sensitive content.
 
-Use [mrscraper-scrape](../mrscraper-scrape/SKILL.md) when the requested outcome
-needs backend extraction of a structured record or set of fields. Use
-[mrscraper-serp](../mrscraper-serp/SKILL.md) when discovery must happen first.
+When many pages share a layout, retrieve representative pages, define one local
+extractor, retrieve the remaining pages in parallel when safe and proportional,
+and apply the same extractor to every saved response.
 
-## Step 2 — Run the Fetch
+## Step 2 — Retrieve the Page
 
-The client may namespace the tool name; select fetch from the MrScraper MCP
-provider. Start with one call containing only the required URL:
+The client may namespace the tool name; select scraperAPI from the MrScraper
+MCP provider. Start with one call containing only the required URL, which
+requests HTML:
 
     {
-      "url": "https://example.com"
+      "url": "https://www.scrapethissite.com/pages/simple/"
     }
 
-The result is available in MCP structuredContent and as formatted JSON text:
+Request Markdown instead of HTML for readable text:
+
+    {
+      "url": "https://www.scrapethissite.com/pages/simple/",
+      "html": false,
+      "markdown": true
+    }
+
+The result is available in MCP structuredContent and as formatted JSON text.
+The requested representations are in data:
 
     {
       "status_code": 200,
-      "data": "<html>...</html>",
+      "data": {
+        "html": "<!DOCTYPE html>...",
+        "markdown": null,
+        "screenshot": null,
+        "token_usage": 3,
+        "runtime": 18.02,
+        "retry_count": 0,
+        "error": null
+      },
       "headers": {
-        "content-type": "text/html"
+        "x-status-code": "200"
       }
     }
 
-Prefer structuredContent. Check isError, error, and status_code before using
-data. Non-JSON page bodies are preserved exactly.
+Prefer structuredContent. Check isError, error, status_code, and
+headers["x-status-code"] (the target page's status) before using data.
+
+A screenshot is a base64 JPEG that can be large. Request it only when the user
+needs an image, and save it to a file rather than reading it into the
+conversation:
+
+    {
+      "url": "https://www.scrapethissite.com/pages/simple/",
+      "html": false,
+      "screenshot": true
+    }
 
 ## Step 3 — Choose Page-Loading Options
 
-browser_rendering and super_mode are independent axes. All four combinations
-can return different content or failures for the same URL:
+Omit browser_rendering to let the service choose: it falls back to a browser
+automatically when needed. true forces a browser and false disables it.
+screenshot=true always uses a browser.
 
-| browser_rendering | super_mode | Loading path |
-| --- | --- | --- |
-| false | false | Standard routing with the non-browser loader. |
-| true | false | Standard routing with browser loading and JavaScript. |
-| false | true | Real-device routing with the non-browser loader. |
-| true | true | Real-device routing with browser loading and JavaScript. |
-
-Use browser rendering when the page depends on JavaScript:
+Use real-device routing when routing may be the problem:
 
     {
-      "url": "https://example.com/products",
-      "browser_rendering": true
+      "url": "https://www.scrapethissite.com/pages/simple/",
+      "super": true
     }
-
-Use Super Mode with the non-browser loader when routing may be the problem but
-browser loading is unnecessary or returns a worse response:
-
-    {
-      "url": "https://example.com/products",
-      "super_mode": true
-    }
-
-Use both controls for real-device browser loading:
-
-    {
-      "url": "https://example.com/products",
-      "browser_rendering": true,
-      "super_mode": true
-    }
-
-Browser rendering is not a strictly stronger mode. Some sites fail or return
-worse content with browser_rendering=true but load successfully when it is
-false. Super Mode does not enable browser rendering.
 
 Wait for delayed content with a CSS selector:
 
     {
-      "url": "https://example.com/products",
+      "url": "https://www.scrapethissite.com/pages/ajax-javascript/#2015",
       "browser_rendering": true,
-      "wait_for_selector": ".product-card"
+      "wait_for_selector": ".film"
     }
 
 Use geographic routing or homepage navigation when the target requires it:
 
     {
-      "url": "https://example.com/product",
-      "browser_rendering": true,
+      "url": "https://www.scrapethissite.com/pages/simple/",
       "geo_code": "ID",
       "home_page": true
     }
 
-Use geographic routing for geo-specific content.
-
-Bound resource use for a browser-rendered page:
+Bound resource use:
 
     {
-      "url": "https://example.com",
-      "browser_rendering": true,
+      "url": "https://www.scrapethissite.com/pages/ajax-javascript/#2015",
       "block_resources": true,
-      "max_retries": 3,
-      "token_cap": 10000,
+      "max_retries": 1,
+      "token_cap": 10,
       "timeout": 60
     }
 
@@ -140,44 +141,55 @@ Bound resource use for a browser-rendered page:
 
 | MCP input | Default | Request mapping | Use |
 | --- | --- | --- | --- |
-| url | required | Query url | Absolute HTTP or HTTPS target URL. |
-| browser_rendering | false | Query browserRendering | Execute page JavaScript. |
-| super_mode | false | Query super | Select real-device routing independently of browser rendering. |
-| geo_code | omitted | Query geoCode | Route through an ISO 3166-1 alpha-2 country. |
-| wait_for_selector | omitted | Query waitForSelector | Wait for a CSS selector; requires browser_rendering=true. |
-| home_page | false | Query homePage | Visit the site root before the target page. |
-| block_resources | false | Query blockResources | Block nonessential resources during loading. |
-| max_retries | 3 | Query maxRetries | Maximum retries after failure; zero disables retries. |
-| token_cap | omitted | Query tokenCap | Retry token budget; the initial request still runs. |
-| timeout | 30 | Query timeout | Page-load timeout in seconds; transport receives another 30 seconds. |
+| url | required | Body url | Absolute HTTP or HTTPS target URL. |
+| html | true | Query html | Request HTML content. |
+| markdown | false | Query markdown | Request Markdown content. |
+| screenshot | false | Query screenshot | Capture a base64 JPEG; forces browser rendering. |
+| browser_rendering | automatic | Query browserRendering | true forces and false disables browser rendering. |
+| super | false | Query super | Real-device routing, independent of browser rendering. |
+| geo_code | US | Query geoCode | Proxy country, such as US, ID, or SG. |
+| proxy_country | omitted | Query proxyCountry | Compatibility country option. |
+| use_proxy | true | Query useProxy | Set false to skip the service's configured proxy. |
+| proxy | omitted | Query proxy | Custom proxy as username:password@host:port. |
+| wait_for_selector | omitted | Query waitForSelector | CSS selector to wait for. |
+| home_page | false | Query warmStart | Visit the site root before the target page. |
+| block_resources | false | Query blockResources | Block images, CSS, and fonts. |
+| bypass_proxy | false | Query bypassProxy | Enable the proxy-bypass behavior. |
+| cookie_jar | omitted | Query cookieJar | Cookie configuration string. |
+| headers | omitted | Query headers | Target page request headers as an object or JSON string. |
+| max_retries | 3 | Body maxRetries | Maximum retries; zero disables retries. |
+| token_cap | omitted | Body tokenCap | Running token total that stops further retries. |
+| timeout | 120 | Query timeout | Page timeout from 1 to 300 seconds. |
+| stream | omitted | Query stream | Ask the API to stream; the response is still returned once. |
+| discard_token_secret | empty | Header x-discard-token-secret | Optional upstream header. |
 
 Authentication is handled by the MCP client's OAuth 2.1 connection and is
 never a tool input.
 
 ## Step 4 — Inspect and Retry Deliberately
 
-Start with both controls false unless the task already establishes a
-requirement. If the response fails, is blocked, incomplete, or missing dynamic
-content:
+Start with the URL alone unless the task already establishes a requirement. If
+the response fails, is blocked, incomplete, or missing dynamic content:
 
-1. Inspect the initial response.
-2. Change one axis at a time: browser_rendering for JavaScript, or super_mode
+1. Inspect status_code, data.error, headers["x-status-code"], and the content.
+2. Change one axis at a time: force or disable browser_rendering, or set super
    when routing may be the problem.
-3. If browser loading fails or returns worse content, retry the same super_mode
-   value with browser_rendering=false.
-4. Try the remaining untested combinations when the response is still unusable.
-5. Add wait_for_selector, geo_code, or home_page only when evidence shows that
+3. Add wait_for_selector, geo_code, or home_page only when evidence shows that
    the target requires it.
-6. Stop after a usable response unless the user requests a comparison.
+4. Stop after a usable response unless the user requests a comparison.
 
-Do not repeat an identical combination. Treat wait_for_selector as a CSS
-selector, not a duration. Browser rendering loads a page; it does not click
-controls, submit forms, or provide an authenticated interactive browser
-session.
+Do not repeat an identical request. Treat wait_for_selector as a CSS selector,
+not a duration. Browser rendering loads a page; it does not click controls,
+submit forms, or provide an authenticated interactive browser session.
 
 ## Step 5 — Deliver the Result
 
 Answer the user's request from data. Keep the full envelope when headers or
 diagnostics matter. When the user requests an archive, save the successful
-response or its data value with the environment's local file-writing
-capability; fetch itself has no output-path input.
+response or the requested field with the environment's local file-writing
+capability; scraperAPI itself has no output-path input.
+
+Keep retrieved content as the source of truth for later steps. Build
+summaries, tables, JSON transformations, and extraction scripts from it, and
+retrieve the page again when a follow-up needs details that an earlier
+transformation did not preserve.

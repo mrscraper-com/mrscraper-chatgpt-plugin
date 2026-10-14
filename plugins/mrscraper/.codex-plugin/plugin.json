@@ -1,9 +1,10 @@
 {
   "name": "mrscraper",
-  "version": "0.1.1",
-  "description": "MrScraper MCP workflows for web fetching, structured extraction, Google discovery, and saved runs.",
+  "version": "0.2.0",
+  "description": "Web scraping for developers: retrieve pages as HTML, Markdown, or screenshots, search Google, and check MrScraper account usage.",
   "author": {
     "name": "MrScraper",
+    "email": "support@mrscraper.com",
     "url": "https://github.com/mrscraper-com"
   },
   "homepage": "https://docs.mrscraper.com/docs/getting-started/mcp-server",
@@ -21,23 +22,26 @@
   "mcpServers": "./.mcp.json",
   "interface": {
     "displayName": "MrScraper",
-    "shortDescription": "Fetch and extract web data",
-    "longDescription": "Use MrScraper MCP to fetch page content, extract structured JSON, discover pages through Google, rerun saved scraper configurations, inspect stored results, and check account usage. Authentication is handled through the MCP connection.",
+    "shortDescription": "Web scraping for developers",
+    "longDescription": "MrScraper retrieves web pages and Google results for developers building datasets and data-processing workflows. Retrieve a specified URL as HTML, Markdown, a screenshot, or a combination; discover URLs through Google search; and check account usage and remaining tokens.\n\nA MrScraper account and an OAuth connection are required. Page retrieval and search contact external websites through MrScraper. The plugin does not schedule recurring jobs or send notifications. Use third-party sources only where you have authorization and comply with their terms.",
     "developerName": "MrScraper",
-    "category": "Productivity",
+    "category": "Developer Tools",
     "capabilities": [
-      "Read",
-      "Write"
+      "Retrieve page content",
+      "Capture page screenshots",
+      "Search Google",
+      "Check account usage"
     ],
     "websiteURL": "https://docs.mrscraper.com/docs/getting-started/mcp-server",
+    "supportURL": "https://mrscraper.com/support",
     "privacyPolicyURL": "https://mrscraper.com/privacy-policy",
     "termsOfServiceURL": "https://mrscraper.com/terms-of-use",
     "composerIcon": "./assets/mrscraper-chatgpt-composer-icon.png",
     "logo": "./assets/mrscraper-plugin-logo.png",
     "defaultPrompt": [
-      "Get all listing information from this URL and save the extracted JSON.",
       "Fetch this page and summarize its contents.",
-      "Search Google for this topic and return the most relevant sources."
+      "Search Google for this topic and return the most relevant sources.",
+      "Take a screenshot of this page."
     ]
   }
 }
