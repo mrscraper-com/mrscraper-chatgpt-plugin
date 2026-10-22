@@ -1,6 +1,6 @@
 {
   "name": "mrscraper",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Web scraping for developers: retrieve pages as HTML, Markdown, or screenshots, search Google, and check MrScraper account usage.",
   "author": {
     "name": "MrScraper",
