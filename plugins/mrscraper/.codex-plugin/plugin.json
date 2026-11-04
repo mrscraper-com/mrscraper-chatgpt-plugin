@@ -1,7 +1,7 @@
 {
   "name": "mrscraper",
-  "version": "0.2.1",
-  "description": "Web scraping for developers: retrieve pages as HTML, Markdown, or screenshots, search Google, and check MrScraper account usage.",
+  "version": "0.3.0",
+  "description": "Search the web and read public pages as Markdown, HTML, or screenshots, and check MrScraper account usage.",
   "author": {
     "name": "MrScraper",
     "email": "support@mrscraper.com",
@@ -13,24 +13,24 @@
   "keywords": [
     "mrscraper",
     "mcp",
-    "web-scraping",
-    "data-extraction",
-    "search",
+    "web-search",
+    "web-pages",
+    "markdown",
     "research"
   ],
   "skills": "./skills/",
   "mcpServers": "./.mcp.json",
   "interface": {
     "displayName": "MrScraper",
-    "shortDescription": "Web scraping for developers",
-    "longDescription": "MrScraper retrieves web pages and Google results for developers building datasets and data-processing workflows. Retrieve a specified URL as HTML, Markdown, a screenshot, or a combination; discover URLs through Google search; and check account usage and remaining tokens.\n\nA MrScraper account and an OAuth connection are required. Page retrieval and search contact external websites through MrScraper. The plugin does not schedule recurring jobs or send notifications. Use third-party sources only where you have authorization and comply with their terms.",
+    "shortDescription": "Search and read the web",
+    "longDescription": "MrScraper brings live web data into your conversation. Search the web for sources, read any public page as clean Markdown or HTML, capture a screenshot, and check your MrScraper account usage. Use it to research companies, compare products, follow the news, or read documentation.\n\nMrScraper reads a page only when you ask, works with publicly accessible pages, and does not sign in to websites. A MrScraper account and an OAuth connection are required. The plugin does not schedule recurring jobs or send notifications.",
     "developerName": "MrScraper",
-    "category": "Developer Tools",
+    "category": "Productivity",
     "capabilities": [
-      "Retrieve page content",
-      "Capture page screenshots",
-      "Search Google",
-      "Check account usage"
+      "Web search",
+      "Read web pages",
+      "Page screenshots",
+      "Account usage"
     ],
     "websiteURL": "https://docs.mrscraper.com/docs/getting-started/mcp-server",
     "supportURL": "https://mrscraper.com/support",
@@ -39,8 +39,8 @@
     "composerIcon": "./assets/mrscraper-chatgpt-composer-icon.png",
     "logo": "./assets/mrscraper-plugin-logo.png",
     "defaultPrompt": [
-      "Fetch this page and summarize its contents.",
-      "Search Google for this topic and return the most relevant sources.",
+      "Read this page and summarize the key points.",
+      "Search the web for recent reviews of this product and compare them.",
       "Take a screenshot of this page."
     ]
   }

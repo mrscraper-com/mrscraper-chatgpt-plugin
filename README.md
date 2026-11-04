@@ -22,9 +22,9 @@ codex plugin marketplace add mrscraper-com/mrscraper-chatgpt-plugin
 codex plugin add mrscraper@mrscraper-plugins
 ```
 
-The plugin connects to `https://mcp.mrscraper.com/mcp`. When prompted, finish
-the OAuth authorization flow in your browser. Do not paste OAuth tokens or API
-keys into chat.
+The plugin connects to `https://mcp.mrscraper.com/mcp/chatgpt`, MrScraper's
+endpoint for ChatGPT and Codex. When prompted, finish the OAuth authorization
+flow in your browser. Do not paste OAuth tokens or API keys into chat.
 
 ## Try it
 
@@ -32,11 +32,13 @@ keys into chat.
 Fetch https://www.scrapethissite.com/pages/simple/ and summarize the page.
 ```
 
-The hosted server exposes three tools: `scraperAPI` retrieves a known page as
-HTML, Markdown, a screenshot, or a combination; `webSearch` searches Google;
-and `status` reports account usage. The included skills use `scraperAPI` as the
-normal first step when a URL is known because it preserves the page response
-for flexible agent-led analysis.
+The endpoint exposes three tools: `scraperAPI` retrieves a public page as HTML,
+Markdown, a screenshot, or a combination; `webSearch` searches the web; and
+`status` reports account usage. Its `scraperAPI` offers only page-loading
+options (browser rendering, a selector wait, the page country, and a timeout),
+with no proxy, cookie, or header controls. The included skills use
+`scraperAPI` as the normal first step when a URL is known because it preserves
+the page response for flexible agent-led analysis.
 
 ## Contents
 
@@ -51,9 +53,22 @@ The ZIP root must contain `.codex-plugin/plugin.json`, `.mcp.json`, `assets/`,
 and `skills/`. Increment the plugin manifest version when listing metadata
 changes; this version is independent of the hosted MCP server version.
 
-The listing uses the `Developer Tools` category and
+The listing uses the `Productivity` category and
 <https://mrscraper.com/support> for customer support. Keep the description and
 capability labels aligned with the actual tools.
+
+## Changes in 0.3.0
+
+- The plugin connects to `https://mcp.mrscraper.com/mcp/chatgpt` instead of
+  `/mcp`. That endpoint uses the same sign-in, and its `scraperAPI` has only
+  page-loading options.
+- The listing describes web search and reading public pages for research. It
+  no longer mentions Google or developer data pipelines, and it moved from
+  `Developer Tools` to `Productivity`.
+- The skills follow MrScraper MCP 0.3.0: `webSearch` returns a ranked list and
+  takes `num_results`. The page skill covers only the endpoint's options and
+  tells the agent to stop when a site refuses the request or requires signing
+  in.
 
 The privacy-policy URL points to the published policy at
 <https://mrscraper.com/privacy-policy>. A new ZIP does not update that page.

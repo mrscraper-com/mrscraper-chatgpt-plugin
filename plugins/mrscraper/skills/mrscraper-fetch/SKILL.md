@@ -1,7 +1,7 @@
 ---
 name: mrscraper-fetch
 description: |
-  Retrieve a known public URL with MrScraper's scraperAPI tool as HTML, Markdown, a screenshot, or a combination. Use for reading, summarizing, archiving, or analyzing a page and before local extraction; supports automatic browser fallback, real-device routing, proxies, and retries. Use mrscraper-serp when no URL is known.
+  Retrieve a known public URL with MrScraper's scraperAPI tool as HTML, Markdown, a screenshot, or a combination. Use for reading, summarizing, archiving, or analyzing a page and before local extraction; supports automatic browser rendering, waiting for delayed content, and loading a page from a chosen country. Use mrscraper-serp when no URL is known.
 ---
 
 # Retrieve Page Content with MrScraper MCP
@@ -15,22 +15,18 @@ account status, or broader routing, and
 
 ## Page Retrieval Context
 
-scraperAPI calls MrScraper's
-[page-fetching service](https://docs.mrscraper.com/docs/features/unblocker) once.
-Browser rendering executes page JavaScript, geographic routing selects the
-proxy country, selector waits let delayed content appear, and homepage
-navigation visits the site root before the target. Real-device routing (super)
-is independent of browser rendering.
+scraperAPI loads the page once through MrScraper. Browser rendering executes
+page JavaScript, a selector wait lets delayed content appear, and geo_code
+loads the page from a chosen country.
 
-Use scraperAPI only for content the user is authorized to access and in
-accordance with the site's requirements.
+Use scraperAPI only for publicly accessible pages the user is allowed to read,
+and follow the site's terms. scraperAPI does not sign in to websites. When a
+page requires signing in, or the site refuses the request, tell the user and
+stop instead of trying to work around it.
 
-Start with the URL alone and add only the controls the target needs. Plan-token
+Start with the URL alone and add only the controls the page needs. Plan-token
 usage is based on runtime and bandwidth: one token per 30 seconds and one token
-per 0.25 MB, rounded up per component. Resource blocking can reduce bandwidth
-for text-focused pages. Retries stop when the request succeeds, max_retries is
-reached, or the running token total reaches token_cap. The initial request
-always runs even when it exceeds that cap. See the
+per 0.25 MB, rounded up per component. See the
 [Token Plan](https://docs.mrscraper.com/docs/getting-started/api-token) for the
 maintained calculation.
 
@@ -42,7 +38,7 @@ Confirm the target URL and what the user wants:
 - Check whether specific text appears.
 - Archive the page or capture a screenshot.
 - Produce fields, JSON, tables, or other structured output with local logic.
-- Load JavaScript-rendered or geo-sensitive content.
+- Load JavaScript-rendered or country-specific content.
 
 When many pages share a layout, retrieve representative pages, define one local
 extractor, retrieve the remaining pages in parallel when safe and proportional,
@@ -77,7 +73,6 @@ The requested representations are in data:
         "screenshot": null,
         "token_usage": 3,
         "runtime": 18.02,
-        "retry_count": 0,
         "error": null
       },
       "headers": {
@@ -104,13 +99,6 @@ Omit browser_rendering to let the service choose: it falls back to a browser
 automatically when needed. true forces a browser and false disables it.
 screenshot=true always uses a browser.
 
-Use real-device routing when routing may be the problem:
-
-    {
-      "url": "https://www.scrapethissite.com/pages/simple/",
-      "super": true
-    }
-
 Wait for delayed content with a CSS selector:
 
     {
@@ -119,49 +107,25 @@ Wait for delayed content with a CSS selector:
       "wait_for_selector": ".film"
     }
 
-Use geographic routing or homepage navigation when the target requires it:
+Load the page from another country when its content differs by country:
 
     {
       "url": "https://www.scrapethissite.com/pages/simple/",
-      "geo_code": "ID",
-      "home_page": true
-    }
-
-Bound resource use:
-
-    {
-      "url": "https://www.scrapethissite.com/pages/ajax-javascript/#2015",
-      "block_resources": true,
-      "max_retries": 1,
-      "token_cap": 10,
-      "timeout": 60
+      "geo_code": "ID"
     }
 
 ### Parameters
 
-| MCP input | Default | Request mapping | Use |
-| --- | --- | --- | --- |
-| url | required | Body url | Absolute HTTP or HTTPS target URL. |
-| html | true | Query html | Request HTML content. |
-| markdown | false | Query markdown | Request Markdown content. |
-| screenshot | false | Query screenshot | Capture a base64 JPEG; forces browser rendering. |
-| browser_rendering | automatic | Query browserRendering | true forces and false disables browser rendering. |
-| super | false | Query super | Real-device routing, independent of browser rendering. |
-| geo_code | US | Query geoCode | Proxy country, such as US, ID, or SG. |
-| proxy_country | omitted | Query proxyCountry | Compatibility country option. |
-| use_proxy | true | Query useProxy | Set false to skip the service's configured proxy. |
-| proxy | omitted | Query proxy | Custom proxy as username:password@host:port. |
-| wait_for_selector | omitted | Query waitForSelector | CSS selector to wait for. |
-| home_page | false | Query warmStart | Visit the site root before the target page. |
-| block_resources | false | Query blockResources | Block images, CSS, and fonts. |
-| bypass_proxy | false | Query bypassProxy | Enable the proxy-bypass behavior. |
-| cookie_jar | omitted | Query cookieJar | Cookie configuration string. |
-| headers | omitted | Query headers | Target page request headers as an object or JSON string. |
-| max_retries | 3 | Body maxRetries | Maximum retries; zero disables retries. |
-| token_cap | omitted | Body tokenCap | Running token total that stops further retries. |
-| timeout | 120 | Query timeout | Page timeout from 1 to 300 seconds. |
-| stream | omitted | Query stream | Ask the API to stream; the response is still returned once. |
-| discard_token_secret | empty | Header x-discard-token-secret | Optional upstream header. |
+| MCP input | Default | Use |
+| --- | --- | --- |
+| url | required | Absolute HTTP or HTTPS page URL. |
+| html | true | Request HTML content. |
+| markdown | false | Request Markdown content. |
+| screenshot | false | Capture a base64 JPEG; forces browser rendering. |
+| browser_rendering | automatic | true forces and false disables browser rendering. |
+| wait_for_selector | omitted | CSS selector to wait for before returning. |
+| geo_code | US | Country to load the page from, such as US, ID, or SG. |
+| timeout | 120 | Page timeout from 1 to 300 seconds. |
 
 Authentication is handled by the MCP client's OAuth 2.1 connection and is
 never a tool input.
@@ -169,18 +133,19 @@ never a tool input.
 ## Step 4 — Inspect and Retry Deliberately
 
 Start with the URL alone unless the task already establishes a requirement. If
-the response fails, is blocked, incomplete, or missing dynamic content:
+the content is incomplete or missing dynamic content:
 
 1. Inspect status_code, data.error, headers["x-status-code"], and the content.
-2. Change one axis at a time: force or disable browser_rendering, or set super
-   when routing may be the problem.
-3. Add wait_for_selector, geo_code, or home_page only when evidence shows that
-   the target requires it.
+2. Change one option at a time: force browser_rendering, or add
+   wait_for_selector for content that loads late.
+3. Set geo_code only when evidence shows the page differs by country.
 4. Stop after a usable response unless the user requests a comparison.
 
-Do not repeat an identical request. Treat wait_for_selector as a CSS selector,
-not a duration. Browser rendering loads a page; it does not click controls,
-submit forms, or provide an authenticated interactive browser session.
+When the site refuses the request or asks the visitor to sign in, report that
+to the user and stop. Do not repeat an identical request. Treat
+wait_for_selector as a CSS selector, not a duration. Browser rendering loads a
+page; it does not click controls, submit forms, or provide an authenticated
+browser session.
 
 ## Step 5 — Deliver the Result
 
