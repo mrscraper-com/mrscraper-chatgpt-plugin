@@ -24,7 +24,7 @@ If the tools are already available, use the existing connection. If they are
 missing, ask the user to enable the existing MrScraper connection or configure
 the managed Streamable HTTP endpoint:
 
-    https://mcp.mrscraper.com/mcp/chatgpt
+    https://mcp.mrscraper.com/mcp
 
 A self-managed deployment may expose the same tools over Streamable HTTP or
 stdio. Connection setup belongs to the MCP client. After setup or reconnection,

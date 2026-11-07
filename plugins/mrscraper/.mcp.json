@@ -2,7 +2,7 @@
   "mcpServers": {
     "mrscraper": {
       "type": "http",
-      "url": "https://mcp.mrscraper.com/mcp/chatgpt"
+      "url": "https://mcp.mrscraper.com/mcp"
     }
   }
 }
