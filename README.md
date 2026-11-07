@@ -22,9 +22,9 @@ codex plugin marketplace add mrscraper-com/mrscraper-chatgpt-plugin
 codex plugin add mrscraper@mrscraper-plugins
 ```
 
-The plugin connects to `https://mcp.mrscraper.com/mcp/chatgpt`, MrScraper's
-endpoint for ChatGPT and Codex. When prompted, finish the OAuth authorization
-flow in your browser. Do not paste OAuth tokens or API keys into chat.
+The plugin connects to `https://mcp.mrscraper.com/mcp`. When prompted, finish
+the OAuth authorization flow in your browser. Do not paste OAuth tokens or API
+keys into chat.
 
 ## Try it
 
@@ -32,13 +32,13 @@ flow in your browser. Do not paste OAuth tokens or API keys into chat.
 Fetch https://www.scrapethissite.com/pages/simple/ and summarize the page.
 ```
 
-The endpoint exposes three tools: `scraperAPI` retrieves a public page as HTML,
+The server exposes three tools: `scraperAPI` retrieves a public page as HTML,
 Markdown, a screenshot, or a combination; `webSearch` searches the web; and
-`status` reports account usage. Its `scraperAPI` offers only page-loading
-options (browser rendering, a selector wait, the page country, and a timeout),
-with no proxy, cookie, or header controls. The included skills use
-`scraperAPI` as the normal first step when a URL is known because it preserves
-the page response for flexible agent-led analysis.
+`status` reports account usage. For ChatGPT and Codex sign-ins, `scraperAPI`
+offers only page-loading options (browser rendering, a selector wait, the page
+country, and a timeout), with no proxy, cookie, or header controls. The
+included skills use `scraperAPI` as the normal first step when a URL is known
+because it preserves the page response for flexible agent-led analysis.
 
 ## Contents
 
@@ -56,6 +56,13 @@ changes; this version is independent of the hosted MCP server version.
 The listing uses the `Productivity` category and
 <https://mrscraper.com/support> for customer support. Keep the description and
 capability labels aligned with the actual tools.
+
+## Changes in 0.3.1
+
+- The plugin connects to `https://mcp.mrscraper.com/mcp` again. OpenAI's
+  plugin directory doesn't allow an existing plugin to change its MCP URL.
+  MrScraper MCP 0.4.1 gives ChatGPT and Codex sign-ins on `/mcp` the same
+  page-loading-only `scraperAPI` as `/mcp/chatgpt`.
 
 ## Changes in 0.3.0
 
