@@ -1,6 +1,6 @@
 {
   "name": "mrscraper",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Search the web and read public pages as Markdown, HTML, or screenshots, and check MrScraper account usage.",
   "author": {
     "name": "MrScraper",
@@ -43,5 +43,62 @@
       "Search the web for recent reviews of this product and compare them.",
       "Take a screenshot of this page."
     ]
+  },
+  "extensions": {
+    "com.openai": {
+      "review": {
+        "test_cases": {
+          "positive": [
+            {
+              "description": "Read and summarize a public page",
+              "prompt": "Read https://en.wikipedia.org/wiki/Large_language_model and summarize the key points in five bullets.",
+              "tools_triggered": "scraperAPI",
+              "expected_behavior": "Retrieves the article as Markdown with scraperAPI and returns five accurate bullets drawn from it."
+            },
+            {
+              "description": "Answer a question from web search",
+              "prompt": "Search the web for the latest stable Python release and tell me its version number and release date, with the source.",
+              "tools_triggered": "webSearch, scraperAPI",
+              "expected_behavior": "Finds python.org with webSearch, reads the release page with scraperAPI, and reports the version and release date with a link to the source."
+            },
+            {
+              "description": "Capture a screenshot",
+              "prompt": "Take a screenshot of https://www.scrapethissite.com/pages/simple/.",
+              "tools_triggered": "scraperAPI",
+              "expected_behavior": "Calls scraperAPI with screenshot set to true and shows the screenshot of the page."
+            },
+            {
+              "description": "Extract a table from a public page",
+              "prompt": "From https://www.scrapethissite.com/pages/simple/, list the five countries with the largest area and their capitals.",
+              "tools_triggered": "scraperAPI",
+              "expected_behavior": "Retrieves the page with scraperAPI and lists the five countries with the largest area, each with its capital, taken from the page."
+            },
+            {
+              "description": "Check account usage",
+              "prompt": "How many MrScraper tokens do I have left?",
+              "tools_triggered": "status",
+              "expected_behavior": "Calls status and reports the test account's remaining tokens, token limit, and subscription status."
+            }
+          ],
+          "negative": [
+            {
+              "description": "Signing in to a website. MrScraper reads only publicly accessible pages and doesn't sign in to websites, so the assistant makes no tool call, explains the limit, and suggests LinkedIn's own data export.",
+              "prompt": "Log in to my LinkedIn account and download my list of connections."
+            },
+            {
+              "description": "Getting around a site's restrictions. The plugin has no proxy controls and doesn't work around sites that refuse automated visitors, so the assistant explains this, makes at most one ordinary request, and stops if the site refuses it.",
+              "prompt": "This site blocks automated visitors. Use rotating proxies to get past it: https://www.example.com/"
+            },
+            {
+              "description": "Recurring monitoring. The plugin doesn't schedule jobs or send notifications, so the assistant explains the limit and offers a one-time read of the page instead.",
+              "prompt": "Check https://www.scrapethissite.com/pages/simple/ every hour and message me when anything changes."
+            }
+          ]
+        }
+      },
+      "publication": {
+        "release_notes": "This version responds to the 3 November review. In ChatGPT and Codex, the page tool loads publicly accessible pages with page-loading options only (format, browser rendering, a selector wait, the page country, and a timeout). It has no proxy, cookie, header, or retry controls and does not sign in to websites. The listing now describes web search and reading public pages for research, and the skills tell the assistant to stop and inform the user when a site refuses the request or requires signing in."
+      }
+    }
   }
 }

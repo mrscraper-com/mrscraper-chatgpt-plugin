@@ -57,6 +57,17 @@ The listing uses the `Productivity` category and
 <https://mrscraper.com/support> for customer support. Keep the description and
 capability labels aligned with the actual tools.
 
+The review test cases (five positive, three negative) and the release notes
+are in `extensions.com.openai` of the plugin manifest. The dashboard imports
+them from the ZIP and shows them read-only, so change them in the manifest and
+upload a new version. The demo video URL and reviewer credentials stay in the
+dashboard.
+
+## Changes in 0.3.2
+
+- Added the review test cases and release notes to the manifest. The
+  dashboard now requires the test cases to come from the ZIP.
+
 ## Changes in 0.3.1
 
 - The plugin connects to `https://mcp.mrscraper.com/mcp` again. OpenAI's
