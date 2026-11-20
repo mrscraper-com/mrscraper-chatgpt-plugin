@@ -1,6 +1,6 @@
 {
   "name": "mrscraper",
-  "version": "0.3.2",
+  "version": "0.4.0",
   "description": "Search the web and read public pages as Markdown, HTML, or screenshots, and check MrScraper account usage.",
   "author": {
     "name": "MrScraper",
@@ -30,6 +30,8 @@
       "Web search",
       "Read web pages",
       "Page screenshots",
+      "Page data as JSON",
+      "Website brand details",
       "Account usage"
     ],
     "websiteURL": "https://docs.mrscraper.com/docs/getting-started/mcp-server",
@@ -50,34 +52,34 @@
         "test_cases": {
           "positive": [
             {
-              "description": "Read and summarize a public page",
-              "prompt": "Read https://en.wikipedia.org/wiki/Large_language_model and summarize the key points in five bullets.",
-              "tools_triggered": "scraperAPI",
-              "expected_behavior": "Retrieves the article as Markdown with scraperAPI and returns five accurate bullets drawn from it."
-            },
-            {
               "description": "Answer a question from web search",
               "prompt": "Search the web for the latest stable Python release and tell me its version number and release date, with the source.",
-              "tools_triggered": "webSearch, scraperAPI",
-              "expected_behavior": "Finds python.org with webSearch, reads the release page with scraperAPI, and reports the version and release date with a link to the source."
+              "tools_triggered": "webSearch, scrapeMarkdown",
+              "expected_behavior": "Finds python.org with webSearch, reads the release page with scrapeMarkdown, and reports the version and release date with a link to the source."
             },
             {
               "description": "Capture a screenshot",
               "prompt": "Take a screenshot of https://www.scrapethissite.com/pages/simple/.",
-              "tools_triggered": "scraperAPI",
-              "expected_behavior": "Calls scraperAPI with screenshot set to true and shows the screenshot of the page."
+              "tools_triggered": "getScreenshot",
+              "expected_behavior": "Calls getScreenshot and shows the screenshot of the page."
             },
             {
               "description": "Extract a table from a public page",
               "prompt": "From https://www.scrapethissite.com/pages/simple/, list the five countries with the largest area and their capitals.",
-              "tools_triggered": "scraperAPI",
-              "expected_behavior": "Retrieves the page with scraperAPI and lists the five countries with the largest area, each with its capital, taken from the page."
+              "tools_triggered": "scrapeHtml",
+              "expected_behavior": "Retrieves the page with scrapeHtml and lists the five countries with the largest area, each with its capital, taken from the page."
             },
             {
-              "description": "Check account usage",
-              "prompt": "How many MrScraper tokens do I have left?",
-              "tools_triggered": "status",
-              "expected_behavior": "Calls status and reports the test account's remaining tokens, token limit, and subscription status."
+              "description": "Extract structured data from a public page as JSON",
+              "prompt": "Use MrScraper to extract all data as complete as possible from https://mrscraper.com/pricing as JSON.",
+              "tools_triggered": "scrapeJson",
+              "expected_behavior": "Calls scrapeJson on the pricing page and returns the extracted data as JSON, including the plans and prices found on the page."
+            },
+            {
+              "description": "Get a website's brand details",
+              "prompt": "What are the brand colors, fonts, logos, and social links of https://mrscraper.com?",
+              "tools_triggered": "scrapeBrand",
+              "expected_behavior": "Calls scrapeBrand and returns the colors, fonts, logos, and social links found on mrscraper.com."
             }
           ],
           "negative": [
@@ -86,7 +88,7 @@
               "prompt": "Log in to my LinkedIn account and download my list of connections."
             },
             {
-              "description": "Getting around a site's restrictions. The plugin has no proxy controls and doesn't work around sites that refuse automated visitors, so the assistant explains this, makes at most one ordinary request, and stops if the site refuses it.",
+              "description": "Getting around a site's restrictions. The skills tell the assistant not to work around sites that refuse automated visitors, so it uses no proxy settings, explains this, makes at most one ordinary request, and stops if the site refuses it.",
               "prompt": "This site blocks automated visitors. Use rotating proxies to get past it: https://www.example.com/"
             },
             {
@@ -97,7 +99,7 @@
         }
       },
       "publication": {
-        "release_notes": "This version responds to the 3 November review. In ChatGPT and Codex, the page tool loads publicly accessible pages with page-loading options only (format, browser rendering, a selector wait, the page country, and a timeout). It has no proxy, cookie, header, or retry controls and does not sign in to websites. The listing now describes web search and reading public pages for research, and the skills tell the assistant to stop and inform the user when a site refuses the request or requires signing in."
+        "release_notes": "This version updates the plugin for MrScraper MCP server 0.5.0 and its seven standard tools: status, scrapeHtml, scrapeMarkdown, getScreenshot, scrapeBrand, scrapeJson, and webSearch. scrapeHtml, scrapeMarkdown, and getScreenshot replace the earlier scraperAPI tool, and scrapeBrand and scrapeJson are new. The skills and review test cases use the new tools. The skills tell the assistant to read only public pages the user is allowed to read, never to sign in to websites, and to stop and tell the user when a site refuses the request or requires signing in."
       }
     }
   }

@@ -32,13 +32,23 @@ keys into chat.
 Fetch https://www.scrapethissite.com/pages/simple/ and summarize the page.
 ```
 
-The server exposes three tools: `scraperAPI` retrieves a public page as HTML,
-Markdown, a screenshot, or a combination; `webSearch` searches the web; and
-`status` reports account usage. For ChatGPT and Codex sign-ins, `scraperAPI`
-offers only page-loading options (browser rendering, a selector wait, the page
-country, and a timeout), with no proxy, cookie, or header controls. The
-included skills use `scraperAPI` as the normal first step when a URL is known
-because it preserves the page response for flexible agent-led analysis.
+The server exposes seven tools:
+
+| Tool | Description |
+| --- | --- |
+| `status` | Return the raw account status API response without summarizing, redacting body fields, or adding calculated fields. |
+| `scrapeHtml` | Retrieve the raw HTML of a page. Browser rendering is optional. |
+| `scrapeMarkdown` | Retrieve a page as Markdown. Including HTML also enables browser rendering and returns both outputs as JSON. |
+| `getScreenshot` | Capture a base64 screenshot of the full page or top viewport. Browser rendering is always enabled. |
+| `scrapeBrand` | Extract a website's colors, typography, logos, and social links as JSON. |
+| `scrapeJson` | Extract structured JSON from a page using a natural-language prompt. Append Json Schema: and a JSON schema to shape the output. |
+| `webSearch` | Search the web and return ranked results with titles, URLs, descriptions, and sources. |
+
+The included skills use `scrapeMarkdown`, or `scrapeHtml` when the page
+structure matters, as the normal first step when a URL is known because they
+preserve the page response for flexible agent-led analysis. The skills read
+only public pages the user is allowed to read, never sign in to websites, and
+stop and tell the user when a site refuses the request or requires signing in.
 
 ## Contents
 
@@ -62,6 +72,24 @@ are in `extensions.com.openai` of the plugin manifest. The dashboard imports
 them from the ZIP and shows them read-only, so change them in the manifest and
 upload a new version. The demo video URL and reviewer credentials stay in the
 dashboard.
+
+## Changes in 0.4.0
+
+- The plugin follows MrScraper MCP server 0.5.0 and its seven standard tools.
+  `scrapeHtml`, `scrapeMarkdown`, and `getScreenshot` replace `scraperAPI`;
+  `scrapeBrand` and `scrapeJson` are new; and `webSearch` takes `query`,
+  `country`, and `numResults`.
+- The skills are MrScraper's canonical MCP skills with this plugin's review
+  rules. The page skill covers only page-loading and output inputs and leaves
+  the others at their defaults. It reads only public pages the user is allowed
+  to read, never signs in, and stops and tells the user when a site refuses the
+  request or requires signing in.
+- The review test cases use the new tools and include JSON extraction and
+  brand cases. OpenAI accepts exactly five positive cases, so `status` is no
+  longer one of them. The listing adds the two new capabilities.
+- MrScraper MCP 0.5.0 asks for `scrape:read` (scraping and search) and
+  `account:read` (`status`). Connections that already hold `scrape:read` keep
+  working; `scrape:write` is no longer needed.
 
 ## Changes in 0.3.2
 

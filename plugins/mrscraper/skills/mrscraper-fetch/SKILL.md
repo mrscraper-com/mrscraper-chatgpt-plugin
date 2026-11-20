@@ -1,34 +1,24 @@
 ---
 name: mrscraper-fetch
 description: |
-  Retrieve a known public URL with MrScraper's scraperAPI tool as HTML, Markdown, a screenshot, or a combination. Use for reading, summarizing, archiving, or analyzing a page and before local extraction; supports automatic browser rendering, waiting for delayed content, and loading a page from a chosen country. Use mrscraper-serp when no URL is known.
+  Retrieve a known public URL with MrScraper MCP as HTML, Markdown, a screenshot, brand data, or structured JSON. Use for reading, summarizing, archiving, or extracting a page; supports browser rendering, waiting for delayed content, and loading a page from a chosen country. Use mrscraper-serp when no URL is known.
 ---
 
 # Retrieve Page Content with MrScraper MCP
 
-Use the scraperAPI tool supplied by the MrScraper MCP server whenever the user
-already has a public URL. Keep using the retrieved content for summarization,
-comparison, transformation, and structured output. Use
+Use the MrScraper MCP tool that matches the requested representation whenever
+the user already has a public URL. Keep using the retrieved content for
+summarization, comparison, transformation, and structured output. Use
 [mrscraper](../mrscraper/SKILL.md) for connection and authentication checks,
 account status, or broader routing, and
 [mrscraper-serp](../mrscraper-serp/SKILL.md) when discovery must happen first.
 
-## Page Retrieval Context
-
-scraperAPI loads the page once through MrScraper. Browser rendering executes
-page JavaScript, a selector wait lets delayed content appear, and geo_code
-loads the page from a chosen country.
-
-Use scraperAPI only for publicly accessible pages the user is allowed to read,
-and follow the site's terms. scraperAPI does not sign in to websites. When a
+Use these tools only for publicly accessible pages the user is allowed to read,
+and follow the site's terms. These tools do not sign in to websites. When a
 page requires signing in, or the site refuses the request, tell the user and
-stop instead of trying to work around it.
-
-Start with the URL alone and add only the controls the page needs. Plan-token
-usage is based on runtime and bandwidth: one token per 30 seconds and one token
-per 0.25 MB, rounded up per component. See the
-[Token Plan](https://docs.mrscraper.com/docs/getting-started/api-token) for the
-maintained calculation.
+stop instead of trying to work around it. Browser rendering loads a page; it
+does not click controls, submit forms, or provide an authenticated browser
+session.
 
 ## Step 1 — Define the Outcome
 
@@ -37,122 +27,134 @@ Confirm the target URL and what the user wants:
 - Read, summarize, cite, or inspect the page.
 - Check whether specific text appears.
 - Archive the page or capture a screenshot.
-- Produce fields, JSON, tables, or other structured output with local logic.
+- Produce fields, JSON, tables, or other structured output.
+- Get the site's brand colors, typography, logos, and social links.
 - Load JavaScript-rendered or country-specific content.
 
 When many pages share a layout, retrieve representative pages, define one local
 extractor, retrieve the remaining pages in parallel when safe and proportional,
 and apply the same extractor to every saved response.
 
-## Step 2 — Retrieve the Page
+## Step 2 — Choose the Tool
 
-The client may namespace the tool name; select scraperAPI from the MrScraper
-MCP provider. Start with one call containing only the required URL, which
-requests HTML:
+| Tool | Description | data in the response |
+| --- | --- | --- |
+| scrapeHtml | Retrieve the raw HTML of a page. Browser rendering is optional. | HTML text. |
+| scrapeMarkdown | Retrieve a page as Markdown. Including HTML also enables browser rendering and returns both outputs as JSON. | Markdown text; with html set to true, an object with html and markdown. |
+| getScreenshot | Capture a base64 screenshot of the full page or top viewport. Browser rendering is always enabled. | An object with screenshot and the requested html and markdown. |
+| scrapeJson | Extract structured JSON from a page using a natural-language prompt. Append Json Schema: and a JSON schema to shape the output. | The extracted data in data.data, with run metadata. |
+| scrapeBrand | Extract a website's colors, typography, logos, and social links as JSON. | The brand in data.data.brand. |
+
+The client may namespace the tool names; select the tool from the MrScraper MCP
+provider. Start with the URL alone and add only the inputs the outcome needs.
+
+scrapeMarkdown for readable text:
 
     {
-      "url": "https://www.scrapethissite.com/pages/simple/"
+      "url": "https://example.com"
     }
 
-Request Markdown instead of HTML for readable text:
+scrapeHtml rendered in a browser, waiting for an element:
 
     {
-      "url": "https://www.scrapethissite.com/pages/simple/",
+      "url": "https://example.com",
+      "browserRendering": true,
+      "waitForSelector": "body"
+    }
+
+scrapeMarkdown with the page HTML as well:
+
+    {
+      "url": "https://example.com",
+      "html": true
+    }
+
+getScreenshot of the top viewport, with Markdown instead of HTML:
+
+    {
+      "url": "https://example.com",
+      "screenshot": "top",
       "html": false,
       "markdown": true
     }
 
-The result is available in MCP structuredContent and as formatted JSON text.
-The requested representations are in data:
+A screenshot is base64 image data that can be large. Request it only when the
+user needs an image, and save it to a file rather than reading it into the
+conversation.
+
+scrapeJson with a prompt; append Json Schema: and a JSON schema to shape the
+output:
 
     {
-      "status_code": 200,
-      "data": {
-        "html": "<!DOCTYPE html>...",
-        "markdown": null,
-        "screenshot": null,
-        "token_usage": 3,
-        "runtime": 18.02,
-        "error": null
-      },
-      "headers": {
-        "x-status-code": "200"
-      }
+      "url": "https://example.com",
+      "prompt": "Extract the first 2 items with title and price. Json Schema: {\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"title\":{\"type\":\"string\"},\"price\":{\"type\":\"string\"}},\"required\":[\"title\",\"price\"]}}"
     }
 
-Prefer structuredContent. Check isError, error, status_code, and
-headers["x-status-code"] (the target page's status) before using data.
+The prompt describes the data to extract from the loaded page; it does not
+navigate, click, or sign in. Without a prompt, scrapeJson extracts all data as
+completely as possible. Long prompts are sent in a request body automatically.
 
-A screenshot is a base64 JPEG that can be large. Request it only when the user
-needs an image, and save it to a file rather than reading it into the
-conversation:
+scrapeBrand takes only the URL:
 
     {
-      "url": "https://www.scrapethissite.com/pages/simple/",
-      "html": false,
-      "screenshot": true
+      "url": "https://mrscraper.com"
     }
+
+scrapeBrand waits up to 120 seconds. HTTP 422 with a settled job means the page
+has no usable brand data.
 
 ## Step 3 — Choose Page-Loading Options
 
-Omit browser_rendering to let the service choose: it falls back to a browser
-automatically when needed. true forces a browser and false disables it.
-screenshot=true always uses a browser.
+scrapeHtml, scrapeMarkdown, getScreenshot, and scrapeJson share the page
+inputs. scrapeBrand accepts only url.
 
-Wait for delayed content with a CSS selector:
+| MCP input | Tools | Default | Description |
+| --- | --- | --- | --- |
+| url | All | Required | Absolute HTTP or HTTPS URL of the page to process. |
+| timeout | HTML, Markdown, screenshot, JSON | 300 | Page load timeout in seconds, from 1 to 300. The HTTP request allows 30 additional seconds. |
+| geoCode | HTML, Markdown, screenshot, JSON | "us" | Two-letter country code to load the page from, sent in lowercase. |
+| waitUntil | HTML, Markdown, screenshot, JSON | "domcontentloaded" | Navigation completion event to wait for: domcontentloaded, load, networkidle0, or networkidle2. |
+| saveResult | HTML, Markdown, screenshot, JSON | false | Whether to save the result to the dashboard Result tab. |
+| blockResources | HTML, Markdown, screenshot | false | Whether to block images, fonts, and stylesheets while loading the page. |
+| waitForSelector | HTML, Markdown, screenshot | Omitted | Wait for the page to contain the specified CSS selector before returning the result. |
+| browserRendering | HTML, Markdown, JSON | false | Whether to render the page in a browser before returning the result. |
+| html | Markdown, JSON | false | Whether to include the page HTML in the response. |
+| html | Screenshot | true | Whether to include the page HTML in the response. |
+| markdown | Screenshot | false | Whether to include the page Markdown in the response. |
+| screenshot | Screenshot | "full" | Screenshot area to capture: full for the entire page or top for the top viewport. |
+| screenshot | JSON | false | Whether to include a base64 screenshot in the response. |
+| prompt | JSON | "Extract all data as complete as possible." | Instructions describing the data to extract. Append Json Schema: and a JSON schema to shape the output. |
 
-    {
-      "url": "https://www.scrapethissite.com/pages/ajax-javascript/#2015",
-      "browser_rendering": true,
-      "wait_for_selector": ".film"
-    }
+In the Tools column, HTML is scrapeHtml, Markdown is scrapeMarkdown, screenshot
+is getScreenshot, and JSON is scrapeJson.
 
-Load the page from another country when its content differs by country:
-
-    {
-      "url": "https://www.scrapethissite.com/pages/simple/",
-      "geo_code": "ID"
-    }
-
-### Parameters
-
-| MCP input | Default | Use |
-| --- | --- | --- |
-| url | required | Absolute HTTP or HTTPS page URL. |
-| html | true | Request HTML content. |
-| markdown | false | Request Markdown content. |
-| screenshot | false | Capture a base64 JPEG; forces browser rendering. |
-| browser_rendering | automatic | true forces and false disables browser rendering. |
-| wait_for_selector | omitted | CSS selector to wait for before returning. |
-| geo_code | US | Country to load the page from, such as US, ID, or SG. |
-| timeout | 120 | Page timeout from 1 to 300 seconds. |
+Leave any input that this table does not list at its default.
 
 Authentication is handled by the MCP client's OAuth 2.1 connection and is
 never a tool input.
 
 ## Step 4 — Inspect and Retry Deliberately
 
-Start with the URL alone unless the task already establishes a requirement. If
-the content is incomplete or missing dynamic content:
+Prefer structuredContent. Check isError, error, status_code, and
+headers["x-status-code"] (the target page's status) before using data. If the
+content is incomplete or missing dynamic content:
 
-1. Inspect status_code, data.error, headers["x-status-code"], and the content.
-2. Change one option at a time: force browser_rendering, or add
-   wait_for_selector for content that loads late.
-3. Set geo_code only when evidence shows the page differs by country.
+1. Inspect status_code, error, headers["x-status-code"], and the content.
+2. Change one input at a time: set browserRendering, wait for a later
+   waitUntil event, or add waitForSelector for content that loads late.
+3. Set geoCode only when evidence shows that the page differs by country.
 4. Stop after a usable response unless the user requests a comparison.
 
 When the site refuses the request or asks the visitor to sign in, report that
 to the user and stop. Do not repeat an identical request. Treat
-wait_for_selector as a CSS selector, not a duration. Browser rendering loads a
-page; it does not click controls, submit forms, or provide an authenticated
-browser session.
+waitForSelector as a CSS selector, not a duration.
 
 ## Step 5 — Deliver the Result
 
 Answer the user's request from data. Keep the full envelope when headers or
 diagnostics matter. When the user requests an archive, save the successful
 response or the requested field with the environment's local file-writing
-capability; scraperAPI itself has no output-path input.
+capability; the tools have no output-path input.
 
 Keep retrieved content as the source of truth for later steps. Build
 summaries, tables, JSON transformations, and extraction scripts from it, and
