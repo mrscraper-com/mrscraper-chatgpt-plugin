@@ -1,6 +1,6 @@
 {
   "name": "mrscraper",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "Search the web and read public pages as Markdown, HTML, or screenshots, and check MrScraper account usage.",
   "author": {
     "name": "MrScraper",
@@ -99,7 +99,7 @@
         }
       },
       "publication": {
-        "release_notes": "This version updates the plugin for MrScraper MCP server 0.6.0 and its seven tools: status, scrapeHtml, scrapeMarkdown, getScreenshot, scrapeBrand, scrapeJson, and webSearch. scrapeHtml, scrapeMarkdown, and getScreenshot replace the earlier scraperAPI tool, and scrapeBrand and scrapeJson are new. ChatGPT, Codex, and every other client get the same tools, with the inputs in MrScraper's API documentation. Real-device routing and custom proxies are not available. The four page tools save each result to the user's MrScraper dashboard. The skills and review test cases use the new tools. The skills tell the assistant to read only public pages the user is allowed to read, never to sign in to websites, and to stop and tell the user when a site refuses the request or requires signing in."
+        "release_notes": "This version updates the plugin for MrScraper MCP server 0.6.2 and its seven tools: status, scrapeHtml, scrapeMarkdown, getScreenshot, scrapeBrand, scrapeJson, and webSearch. scrapeHtml, scrapeMarkdown, and getScreenshot replace the earlier scraperAPI tool, and scrapeBrand and scrapeJson are new. ChatGPT, Codex, and every other client get the same tools, with the inputs in MrScraper's API documentation. Real-device routing and custom proxies are not available. The four page tools save each result to the user's MrScraper dashboard. The skills and review test cases use the new tools. The skills tell the assistant to read only public pages the user is allowed to read, never to sign in to websites, and to stop and tell the user when a site refuses the request or requires signing in."
       }
     }
   }

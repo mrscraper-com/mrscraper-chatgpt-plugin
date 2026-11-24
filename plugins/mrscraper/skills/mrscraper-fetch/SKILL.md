@@ -124,7 +124,7 @@ that input out.
 | MCP input | Tools | Left out | Description |
 | --- | --- | --- | --- |
 | url | All | Required | URL of the page to scrape. Must include the protocol (https://). |
-| browserRendering | HTML, Markdown, JSON | Not sent | Controls whether the page is loaded in a browser. Leave it out to load the page without a browser first and switch to a browser automatically if the request is blocked. Set true to always load the page in a browser, which JavaScript-heavy sites, SPAs, and pages that load content dynamically need. Set false to never use a browser. |
+| browserRendering | HTML, Markdown, JSON | Not sent | Controls whether the page is loaded in a browser. Leave it out to let MrScraper decide whether the page needs one. Set true to always load the page in a browser, which JavaScript-heavy sites, SPAs, and pages that load content dynamically need. Set false to never use a browser. |
 | timeout | HTML, Markdown, screenshot, JSON | Not sent | Maximum seconds to wait for the scrape before the request times out, from 1 to 330. Increase for slow or complex pages. Defaults to 300. |
 | warmStart | HTML, Markdown, JSON | Not sent | Opens the site's home page first to warm the session before loading the target URL. Useful for sites that expect a normal browsing session before deeper pages. |
 | blockResources | HTML, Markdown, JSON | Not sent | Blocks images, fonts, and stylesheets from loading. Speeds up scraping and reduces bandwidth usage. |
